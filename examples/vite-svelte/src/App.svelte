@@ -1,6 +1,10 @@
 <script lang="ts">
   import { wallet, director } from './wallet'
-  import type { PreviewFederation } from '@fedimint/core'
+  import type {
+    ParsedInviteCode,
+    ParsedBolt11Invoice,
+    PreviewFederation,
+  } from '@fedimint/core'
 
   const TESTNET_FEDERATION_CODE =
     'fed11qgqrgvnhwden5te0v9k8q6rp9ekh2arfdeukuet595cr2ttpd3jhq6rzve6zuer9wchxvetyd938gcewvdhk6tcqqysptkuvknc7erjgf4em3zfh90kffqf9srujn6q53d6r056e4apze5cw27h75'
@@ -25,6 +29,108 @@
       unsubscribe?.()
     }
   })
+
+  // --- Mnemonic Manager ---
+  let mnemonicState = $state('')
+  let inputMnemonic = $state('')
+  let activeAction = $state<'get' | 'set' | 'generate' | null>(null)
+  let mnemonicLoading = $state(false)
+  let mnemonicMessage = $state<{
+    text: string
+    type: 'success' | 'error'
+  } | null>(null)
+  let showMnemonic = $state(false)
+
+  function extractErrorMessage(error: any): string {
+    let errorMsg = 'Operation failed'
+    if (error instanceof Error) {
+      errorMsg = error.message
+    } else if (typeof error === 'object' && error !== null) {
+      const rpcError = error as any
+      if (rpcError.error) {
+        errorMsg = rpcError.error
+      } else if (rpcError.message) {
+        errorMsg = rpcError.message
+      }
+    }
+    return errorMsg
+  }
+
+  async function handleMnemonicAction(action: 'get' | 'set' | 'generate') {
+    if (activeAction === action) {
+      activeAction = null
+      return
+    }
+    activeAction = action
+    mnemonicMessage = null
+
+    if (action === 'get') {
+      await handleGetMnemonic()
+    } else if (action === 'generate') {
+      await handleGenerateMnemonic()
+    }
+  }
+
+  async function handleGenerateMnemonic() {
+    mnemonicLoading = true
+    try {
+      const newMnemonic = await director.generateMnemonic()
+      mnemonicState = newMnemonic.join(' ')
+      mnemonicMessage = { text: 'New mnemonic generated!', type: 'success' }
+      showMnemonic = true
+    } catch (error) {
+      console.error('Error generating mnemonic:', error)
+      mnemonicMessage = { text: extractErrorMessage(error), type: 'error' }
+    } finally {
+      mnemonicLoading = false
+    }
+  }
+
+  async function handleGetMnemonic() {
+    mnemonicLoading = true
+    try {
+      const mnemonic = await director.getMnemonic()
+      if (mnemonic && mnemonic.length > 0) {
+        mnemonicState = mnemonic.join(' ')
+        mnemonicMessage = { text: 'Mnemonic retrieved!', type: 'success' }
+        showMnemonic = true
+      } else {
+        mnemonicMessage = { text: 'No mnemonic found', type: 'error' }
+      }
+    } catch (error) {
+      console.error('Error getting mnemonic:', error)
+      mnemonicMessage = { text: extractErrorMessage(error), type: 'error' }
+    } finally {
+      mnemonicLoading = false
+    }
+  }
+
+  async function handleSetMnemonic() {
+    if (!inputMnemonic.trim()) return
+    mnemonicLoading = true
+    try {
+      const words = inputMnemonic.trim().split(/\s+/)
+      await director.setMnemonic(words)
+      mnemonicMessage = { text: 'Mnemonic set successfully!', type: 'success' }
+      inputMnemonic = ''
+      mnemonicState = words.join(' ')
+      activeAction = null
+    } catch (error) {
+      console.error('Error setting mnemonic:', error)
+      mnemonicMessage = { text: extractErrorMessage(error), type: 'error' }
+    } finally {
+      mnemonicLoading = false
+    }
+  }
+
+  async function copyMnemonicToClipboard() {
+    try {
+      await navigator.clipboard.writeText(mnemonicState)
+      mnemonicMessage = { text: 'Copied to clipboard!', type: 'success' }
+    } catch {
+      mnemonicMessage = { text: 'Failed to copy', type: 'error' }
+    }
+  }
 
   // --- Join Federation ---
   let inviteCode = $state(TESTNET_FEDERATION_CODE)
@@ -132,6 +238,49 @@
     }
   }
 
+  // --- Parse Invite Code ---
+  let parseInviteInput = $state('')
+  let parseInviteResult = $state<ParsedInviteCode | null>(null)
+  let parseInviteError = $state('')
+  let parsingInvite = $state(false)
+
+  async function parseInviteCode() {
+    parseInviteResult = null
+    parseInviteError = ''
+    parsingInvite = true
+    try {
+      const result = await director.parseInviteCode(parseInviteInput)
+      parseInviteResult = result
+    } catch (e) {
+      console.error('Error parsing invite code', e)
+      parseInviteError = e instanceof Error ? e.message : String(e)
+    } finally {
+      parsingInvite = false
+    }
+  }
+
+  // --- Parse Lightning Invoice ---
+  let parseInvoiceInput = $state('')
+  let parseInvoiceResult = $state<ParsedBolt11Invoice | null>(null)
+  let parseInvoiceError = $state('')
+  let parsingInvoice = $state(false)
+
+  async function parseLightningInvoice() {
+    parseInvoiceResult = null
+    parseInvoiceError = ''
+    parsingInvoice = true
+    try {
+      const result = await director.parseBolt11Invoice(parseInvoiceInput)
+      console.log('result ', result)
+      parseInvoiceResult = result
+    } catch (e) {
+      console.error('Error parsing invoice', e)
+      parseInvoiceError = e instanceof Error ? e.message : String(e)
+    } finally {
+      parsingInvoice = false
+    }
+  }
+
   // --- Deposit ---
   let depositAddress = $state('')
   let addressError = $state('')
@@ -177,7 +326,7 @@
 </script>
 
 <header>
-  <h1>Fedimint Svelte Demo</h1>
+  <h1>Fedimint Typescript Library Demo</h1>
 
   <div class="steps">
     <strong>Steps to get started:</strong>
@@ -218,6 +367,90 @@
     </div>
   </div>
 
+  <!-- Mnemonic Manager -->
+  <div class="section mnemonic-section">
+    <h3>🔑 Mnemonic Manager</h3>
+
+    <div class="mnemonic-buttons">
+      <button
+        onclick={() => handleMnemonicAction('get')}
+        disabled={mnemonicLoading}
+        class="btn {activeAction === 'get' ? 'active' : ''}"
+      >
+        Get
+      </button>
+      <button
+        onclick={() => handleMnemonicAction('set')}
+        disabled={mnemonicLoading}
+        class="btn {activeAction === 'set' ? 'active' : ''}"
+      >
+        Set
+      </button>
+      <button
+        onclick={() => handleMnemonicAction('generate')}
+        disabled={mnemonicLoading}
+        class="btn {activeAction === 'generate' ? 'active' : ''}"
+      >
+        Generate
+      </button>
+    </div>
+
+    {#if activeAction === 'set'}
+      <form
+        onsubmit={(e) => {
+          e.preventDefault()
+          handleSetMnemonic()
+        }}
+        class="mnemonic-form"
+      >
+        <textarea
+          placeholder="Enter 12 or 24 words separated by spaces"
+          bind:value={inputMnemonic}
+          rows={2}
+          class="mnemonic-input"
+        ></textarea>
+        <button
+          type="submit"
+          disabled={mnemonicLoading || !inputMnemonic.trim()}
+          class="btn btn-primary"
+        >
+          {mnemonicLoading ? 'Setting...' : 'Set Mnemonic'}
+        </button>
+      </form>
+    {/if}
+
+    {#if mnemonicState}
+      <div class="mnemonic-display">
+        <div class="mnemonic-output">
+          <span class={showMnemonic ? '' : 'blurred'}>
+            {mnemonicState}
+          </span>
+          <div class="mnemonic-actions">
+            <button
+              onclick={() => (showMnemonic = !showMnemonic)}
+              class="btn btn-small"
+              title={showMnemonic ? 'Hide mnemonic' : 'Show mnemonic'}
+            >
+              {showMnemonic ? '👁️' : '👁️‍🗨️'}
+            </button>
+            <button
+              onclick={copyMnemonicToClipboard}
+              class="btn btn-small"
+              disabled={!showMnemonic}
+              title="Copy to clipboard"
+            >
+              📋
+            </button>
+          </div>
+        </div>
+      </div>
+    {/if}
+
+    {#if mnemonicMessage}
+      <div class="message {mnemonicMessage.type}">{mnemonicMessage.text}</div>
+    {/if}
+  </div>
+
   <!-- Join Federation -->
   <div class="section">
     <h3>Join Federation</h3>
@@ -251,29 +484,57 @@
       <div class="preview-result">
         <h4>Federation Preview</h4>
         <div class="preview-info">
-          <div class="preview-row">
+          <div>
             <strong>Federation ID:</strong>
             <code class="id">{previewData.federation_id}</code>
           </div>
-          <div class="preview-row">
+          <div>
             <strong>Name:</strong>
             <span>
               {previewData.config.global.meta?.federation_name || 'Unnamed'}
             </span>
           </div>
-          <div class="preview-row">
+          <div>
             <strong>Consensus Version:</strong>
             <span>
               {previewData.config.global.consensus_version.major}.{previewData
                 .config.global.consensus_version.minor}
             </span>
           </div>
-          <div class="preview-row">
+          <div>
             <strong>Guardians:</strong>
             <span>
               {Object.keys(previewData.config.global.api_endpoints).length}
             </span>
           </div>
+
+          <details class="preview-details">
+            <summary>Guardian Endpoints</summary>
+            <div class="guardian-list">
+              {#each Object.entries(previewData.config.global.api_endpoints) as [id, peer]}
+                <div class="guardian-item">
+                  <div><strong>{peer.name}</strong></div>
+                  <div class="url">{peer.url}</div>
+                </div>
+              {/each}
+            </div>
+          </details>
+
+          <details class="preview-details">
+            <summary>Module Configuration</summary>
+            <div class="module-list">
+              {#each Object.entries(previewData.config.modules) as [id, mod]}
+                <div class="module-item">
+                  <strong>{mod.kind}</strong>
+                </div>
+              {/each}
+            </div>
+          </details>
+
+          <details class="preview-details">
+            <summary>Full JSON</summary>
+            <pre>{JSON.stringify(previewData, null, 2)}</pre>
+          </details>
         </div>
       </div>
     {/if}
@@ -322,7 +583,7 @@
       </button>
     </form>
     <div>
-      mutinynet faucet:
+      mutinynet faucet:{' '}
       <a href="https://faucet.mutinynet.com/" target="_blank">
         https://faucet.mutinynet.com/
       </a>
@@ -387,6 +648,83 @@
     {/if}
   </div>
 
+  <!-- Parse Invite Code -->
+  <div class="section">
+    <h3>Parse Invite Code</h3>
+    <form
+      onsubmit={(e) => {
+        e.preventDefault()
+        parseInviteCode()
+      }}
+      class="row"
+    >
+      <input
+        placeholder="Enter invite code..."
+        bind:value={parseInviteInput}
+        required
+      />
+      <button type="submit" disabled={parsingInvite}>
+        {parsingInvite ? 'Parsing...' : 'Parse'}
+      </button>
+    </form>
+    {#if parseInviteResult}
+      <div class="success">
+        <div class="row">
+          <strong>Fed Id:</strong>
+          <div class="id">{parseInviteResult.federation_id}</div>
+        </div>
+        <div class="row">
+          <strong>Fed url:</strong>
+          <div class="url">{parseInviteResult.url}</div>
+        </div>
+      </div>
+    {/if}
+    {#if parseInviteError}
+      <div class="error">{parseInviteError}</div>
+    {/if}
+  </div>
+
+  <!-- Parse Lightning Invoice -->
+  <div class="section">
+    <h3>Parse Lightning Invoice</h3>
+    <form
+      onsubmit={(e) => {
+        e.preventDefault()
+        parseLightningInvoice()
+      }}
+      class="row"
+    >
+      <input
+        placeholder="Enter invoice..."
+        bind:value={parseInvoiceInput}
+        required
+      />
+      <button type="submit" disabled={parsingInvoice}>
+        {parsingInvoice ? 'Parsing...' : 'Parse'}
+      </button>
+    </form>
+    {#if parseInvoiceResult}
+      <div class="success">
+        <div class="row">
+          <strong>Amount :</strong>
+          <div class="id">{parseInvoiceResult.amount}</div>
+          sats
+        </div>
+        <div class="row">
+          <strong>Expiry :</strong>
+          <div class="url">{parseInvoiceResult.expiry}</div>
+        </div>
+        <div class="row">
+          <strong>Memo :</strong>
+          <div class="url">{parseInvoiceResult.memo}</div>
+        </div>
+      </div>
+    {/if}
+    {#if parseInvoiceError}
+      <div class="error">{parseInvoiceError}</div>
+    {/if}
+  </div>
+
   <!-- Generate Deposit Address -->
   <div class="section">
     <h3>Generate Deposit Address</h3>
@@ -446,188 +784,3 @@
     {/if}
   </div>
 </main>
-
-<style>
-  :global(body) {
-    margin: 0;
-    background-color: #181818;
-    color: rgba(255, 255, 255, 0.87);
-    color-scheme: dark;
-    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-    font-synthesis: none;
-    font-weight: 400;
-    line-height: 1.5;
-    text-rendering: optimizeLegibility;
-    word-wrap: break-word;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  header {
-    max-width: 600px;
-    margin: 0 auto 1.5rem;
-    padding: 1rem;
-    text-align: center;
-  }
-
-  .steps {
-    text-align: left;
-    display: inline-block;
-    font-size: 1.2rem;
-  }
-
-  main {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 1rem;
-  }
-
-  h3 {
-    margin-top: 0;
-    margin-bottom: 0.75rem;
-  }
-
-  input,
-  button {
-    font-size: 0.9rem;
-    padding: 0.4em 0.8em;
-    border-radius: 8px;
-    border: 1px solid #444;
-    background-color: #333;
-    color: rgba(255, 255, 255, 0.87);
-  }
-
-  input {
-    width: 100%;
-    max-width: 300px;
-  }
-
-  button {
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-
-  button:hover {
-    background-color: #444;
-  }
-
-  button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .row:last-child {
-    margin-bottom: 0;
-  }
-
-  .error {
-    color: red;
-  }
-
-  .success {
-    color: green;
-  }
-
-  .section {
-    background-color: #242424;
-    border-radius: 8px;
-    padding: 0.75rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    font-size: 1.1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .input-group {
-    display: flex;
-    flex-direction: row;
-    gap: 0.5rem;
-    padding-bottom: 0.5rem;
-  }
-
-  .input-group label {
-    font-weight: bold;
-    align-self: center;
-  }
-
-  .input-group input {
-    padding: 0.5rem;
-    font-size: 1rem;
-  }
-
-  .invoice-wrap {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    max-width: 100%;
-    overflow-x: auto;
-    background-color: #333;
-    padding: 0.5rem;
-    border-radius: 4px;
-  }
-
-  .preview-result {
-    margin-top: 1rem;
-    padding: 1rem;
-    background-color: #333;
-    border-radius: 8px;
-    border: 1px solid #444;
-  }
-
-  .preview-result h4 {
-    margin-top: 0;
-    margin-bottom: 0.75rem;
-  }
-
-  .preview-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .preview-row {
-    display: flex;
-    flex-direction: row;
-    gap: 0.5rem;
-    align-items: center;
-  }
-
-  code.id {
-    font-size: 0.8rem;
-    word-break: break-all;
-  }
-
-  @media (min-width: 768px) {
-    header,
-    main {
-      max-width: 800px;
-      padding: 0;
-    }
-
-    .section {
-      padding: 1rem;
-      font-size: 1.2rem;
-    }
-
-    .row {
-      margin-bottom: 1rem;
-    }
-
-    input,
-    button {
-      font-size: 1rem;
-      padding: 0.5em 1em;
-    }
-  }
-</style>
