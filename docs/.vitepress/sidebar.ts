@@ -113,7 +113,15 @@ const FedimintWalletSidebar = [
         base: '/core/FedimintWallet/LightningService/',
         items: [
           { text: 'payInvoice()', link: 'payInvoice' },
+          {
+            text: 'payLightningAddress(address, amountMsats)',
+            link: 'payLightningAddress',
+          },
           { text: 'createInvoice()', link: 'createInvoice' },
+          {
+            text: 'verifyLightningAddress(address)',
+            link: 'verifyLightningAddress',
+          },
           // {
           //   text: 'createInvoiceWithGateway()',
           //   link: 'createInvoiceWithGateway',
