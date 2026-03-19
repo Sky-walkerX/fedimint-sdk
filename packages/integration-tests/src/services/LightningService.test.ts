@@ -2,6 +2,183 @@ import { expect } from 'vitest'
 import { keyPair } from '../test/crypto'
 import { walletTest } from '../test/fixtures'
 
+const LNURL_TEST_ADDRESS = import.meta.env.LNURL_TEST_ADDRESS
+const LNURL_TEST_AMOUNT_MSATS = Number(import.meta.env.LNURL_TEST_AMOUNT_MSATS)
+const lnurlWalletTest = LNURL_TEST_ADDRESS ? walletTest : walletTest.skip
+
+const parseLnurlPayResponse = (response: unknown) => {
+  expect(response).toBeDefined()
+  expect(response).toMatchObject({
+    callback: expect.any(String),
+    maxSendable: expect.any(Number),
+    metadata: expect.any(String),
+    minSendable: expect.any(Number),
+    tag: expect.any(String),
+  })
+  return response as {
+    callback: string
+    maxSendable: number
+    metadata: string
+    minSendable: number
+    tag: string
+  }
+}
+
+const parsePayLightningAddressResponse = (response: unknown) => {
+  expect(response).toBeDefined()
+  expect(response).toMatchObject({
+    contract_id: expect.any(String),
+    fee: expect.any(Number),
+    payment_type: expect.any(Object),
+  })
+  return response as {
+    contract_id: string
+    fee: number
+    payment_type: {
+      lightning?: string
+      internal?: string
+    }
+  }
+}
+
+walletTest(
+  'verifyLightningAddress should throw on invalid lightning address',
+  async ({ wallet }) => {
+    expect(wallet).toBeDefined()
+    expect(wallet.isOpen()).toBe(true)
+
+    const counterBefore = wallet.testing.getRequestCounter()
+    try {
+      await wallet.lightning.verifyLightningAddress('not-a-lightning-address')
+      expect.unreachable('Should throw error')
+    } catch (error) {
+      expect(error).toBeDefined()
+    }
+
+    expect(wallet.testing.getRequestCounter()).toBe(counterBefore + 1)
+  },
+)
+
+walletTest(
+  'payLightningAddress should throw on invalid lightning address',
+  async ({ wallet }) => {
+    expect(wallet).toBeDefined()
+    expect(wallet.isOpen()).toBe(true)
+
+    const counterBefore = wallet.testing.getRequestCounter()
+    try {
+      await wallet.lightning.payLightningAddress(
+        'not-a-lightning-address',
+        1000,
+      )
+      expect.unreachable('Should throw error')
+    } catch (error) {
+      expect(error).toBeDefined()
+    }
+
+    expect(wallet.testing.getRequestCounter()).toBe(counterBefore + 1)
+  },
+)
+
+lnurlWalletTest(
+  'verifyLightningAddress should return lnurl metadata for configured address',
+  async ({ wallet }) => {
+    expect(wallet).toBeDefined()
+    expect(wallet.isOpen()).toBe(true)
+
+    const counterBefore = wallet.testing.getRequestCounter()
+    const response =
+      await wallet.lightning.verifyLightningAddress(LNURL_TEST_ADDRESS)
+    const lnurl = parseLnurlPayResponse(response)
+    expect(lnurl.tag).toBe('payRequest')
+    expect(lnurl.callback.length).toBeGreaterThan(0)
+    expect(lnurl.minSendable).toBeLessThanOrEqual(lnurl.maxSendable)
+    expect(wallet.testing.getRequestCounter()).toBe(counterBefore + 1)
+  },
+)
+
+lnurlWalletTest(
+  'payLightningAddress should pay configured lnurl address',
+  { timeout: 20_000 },
+  async ({ fundedWallet }) => {
+    expect(fundedWallet).toBeDefined()
+    expect(fundedWallet.isOpen()).toBe(true)
+
+    const verifyResponse =
+      await fundedWallet.lightning.verifyLightningAddress(LNURL_TEST_ADDRESS)
+    const lnurl = parseLnurlPayResponse(verifyResponse)
+    const amountMsats = Math.min(
+      Math.max(LNURL_TEST_AMOUNT_MSATS || 1000, lnurl.minSendable),
+      lnurl.maxSendable,
+    )
+
+    const initialBalance = await fundedWallet.balance.getBalance()
+    const payment = parsePayLightningAddressResponse(
+      await fundedWallet.lightning.payLightningAddress(
+        LNURL_TEST_ADDRESS,
+        amountMsats,
+      ),
+    )
+
+    if (payment.payment_type.lightning) {
+      const waitResult = await fundedWallet.lightning.waitForPay(
+        payment.payment_type.lightning,
+      )
+      expect(waitResult.success).toBe(true)
+    }
+
+    const finalBalance = await fundedWallet.balance.getBalance()
+    expect(finalBalance).toBeLessThan(initialBalance)
+  },
+)
+
+lnurlWalletTest(
+  'payLightningAddress should throw when amount is below lnurl minimum',
+  async ({ wallet }) => {
+    expect(wallet).toBeDefined()
+    expect(wallet.isOpen()).toBe(true)
+
+    const verifyResponse =
+      await wallet.lightning.verifyLightningAddress(LNURL_TEST_ADDRESS)
+    const lnurl = parseLnurlPayResponse(verifyResponse)
+    const invalidAmount = lnurl.minSendable - 1
+    expect(invalidAmount).toBeGreaterThanOrEqual(0)
+
+    try {
+      await wallet.lightning.payLightningAddress(
+        LNURL_TEST_ADDRESS,
+        invalidAmount,
+      )
+      expect.unreachable('Should throw error')
+    } catch (error) {
+      expect(error).toBeDefined()
+    }
+  },
+)
+
+lnurlWalletTest(
+  'payLightningAddress should throw when amount is above lnurl maximum',
+  async ({ wallet }) => {
+    expect(wallet).toBeDefined()
+    expect(wallet.isOpen()).toBe(true)
+
+    const verifyResponse =
+      await wallet.lightning.verifyLightningAddress(LNURL_TEST_ADDRESS)
+    const lnurl = parseLnurlPayResponse(verifyResponse)
+    const invalidAmount = lnurl.maxSendable + 1
+
+    try {
+      await wallet.lightning.payLightningAddress(
+        LNURL_TEST_ADDRESS,
+        invalidAmount,
+      )
+      expect.unreachable('Should throw error')
+    } catch (error) {
+      expect(error).toBeDefined()
+    }
+  },
+)
+
 walletTest(
   'createInvoice should create a bolt11 invoice',
   async ({ wallet }) => {

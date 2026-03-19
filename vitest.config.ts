@@ -33,6 +33,9 @@ export default defineConfig({
           },
           env: {
             FAUCET: `http://localhost:15243`,
+            LNURL_TEST_ADDRESS: process.env.LNURL_TEST_ADDRESS ?? '',
+            LNURL_TEST_AMOUNT_MSATS:
+              process.env.LNURL_TEST_AMOUNT_MSATS ?? '1000',
           },
         },
       },
