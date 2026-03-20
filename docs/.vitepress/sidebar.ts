@@ -19,7 +19,7 @@ export function getSidebar() {
       text: 'Examples',
       items: [
         { text: 'Vite + React', link: 'vite-react' },
-        { text: 'Vite + Svelte', link: 'vite-svelte' },
+        { text: 'SvelteKit', link: 'vite-svelte' },
         { text: 'Vanilla JS', link: 'bare-js' },
         { text: 'Next.JS', link: 'next-js' },
         { text: 'Webpack', link: 'webpack' },

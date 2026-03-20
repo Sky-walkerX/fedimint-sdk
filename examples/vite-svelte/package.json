@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "dev": "svelte-kit sync && vite dev",
+    "build": "svelte-kit sync && vite build",
+    "preview": "svelte-kit sync && vite preview",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "clean:deep": "pnpm run clean && rm -rf node_modules"
   },
@@ -14,6 +14,8 @@
     "@fedimint/transport-web": "latest"
   },
   "devDependencies": {
+    "@sveltejs/adapter-auto": "^6.0.0",
+    "@sveltejs/kit": "^2.39.6",
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "svelte": "^5.28.2",
     "typescript": "^5.9.3",

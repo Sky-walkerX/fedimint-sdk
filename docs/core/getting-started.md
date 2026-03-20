@@ -167,9 +167,9 @@ module.exports = {
 
 ### Svelte
 
-::: details Svelte (Vite) Setup
+::: details SvelteKit Setup
 
-Svelte projects using Vite need the same wasm plugin setup. Install the required plugins:
+SvelteKit projects need the same wasm plugin setup. Install the required plugin:
 
 ::: code-group
 
@@ -189,18 +189,18 @@ pnpm add vite-plugin-wasm
 bun add vite-plugin-wasm
 ```
 
-Then update your `vite.config.ts` to include the wasm plugin alongside `@sveltejs/vite-plugin-svelte`:
+Then update your `vite.config.ts` to include the wasm plugin alongside `@sveltejs/kit/vite`:
 
 ::: code-group
 
 ```ts{3,7,12-14,17-19} [vite.config.ts]
-import { svelte } from '@sveltejs/vite-plugin-svelte'
+import { sveltekit } from '@sveltejs/kit/vite'
 import { defineConfig } from 'vite'
 import wasm from 'vite-plugin-wasm'
 
-// https://vitejs.dev/config/
+// https://vite.dev/config/
 export default defineConfig({
-  plugins: [svelte(), wasm()],
+  plugins: [sveltekit(), wasm()],
 
   worker: {
     format: 'es',
@@ -218,7 +218,7 @@ export default defineConfig({
 })
 ```
 
-Check out the [svelte sample app](../examples/vite-svelte) for a full working example.
+Check out the [SvelteKit sample app](../examples/vite-svelte) for a full working example.
 
 :::
 
@@ -354,7 +354,7 @@ console.log('Total amount:', parsedNotes.total_amount)
 
 ## Examples
 
-Check out an example app using [Vite + React](../examples/vite-react.md), [Vite + Svelte](../examples/vite-svelte.md), or other [examples](../examples/bare-js.md).
+Check out an example app using [Vite + React](../examples/vite-react.md), [SvelteKit](../examples/vite-svelte.md), or other [examples](../examples/bare-js.md).
 
 Check out an example app using [VanillaJS + HTML](../examples/bare-js.md).
 

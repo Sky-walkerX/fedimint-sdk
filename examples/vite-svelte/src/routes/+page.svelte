@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { wallet, director } from './wallet'
+  import { wallet, director } from '../wallet'
   import type {
     ParsedInviteCode,
     ParsedBolt11Invoice,
