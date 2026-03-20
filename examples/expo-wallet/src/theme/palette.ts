@@ -1,0 +1,18 @@
+export const palette = {
+  bgBase: '#FFF7EC',
+  bgAccent: '#FFE0B2',
+  bgBlobOne: '#FFD39A',
+  bgBlobTwo: '#F7B267',
+  card: '#FFFDF8',
+  cardBorder: '#F0D6B2',
+  textPrimary: '#2B1D0E',
+  textSecondary: '#7A6248',
+  brand: '#E07A2F',
+  brandPressed: '#C96824',
+  success: '#2D8C54',
+  danger: '#B7472A',
+  inputBg: '#FFFFFF',
+  inputBorder: '#E7C9A0',
+  tabActive: '#E07A2F',
+  tabInactive: '#9A7D59',
+} as const
