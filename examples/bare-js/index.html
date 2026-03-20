@@ -15,6 +15,26 @@
       <button id="getBalance">wallet.balance.getBalance()</button>
       <button id="createInvoice">wallet.lightning.createInvoice(1000, 'Test Invoice')</button>
     </div>
+
+    <div class="section">
+      <h3>Verify Lightning Address</h3>
+      <form id="verifyAddressForm" class="row">
+        <input id="verifyAddressInput" type="text" placeholder="name@domain.com" required />
+        <button type="submit">verify</button>
+      </form>
+      <div id="verifyAddressResult"></div>
+    </div>
+
+    <div class="section">
+      <h3>Pay Lightning Address</h3>
+      <form id="payAddressForm" class="row">
+        <input id="payAddressInput" type="text" placeholder="name@domain.com" required />
+        <input id="payAddressAmount" type="number" min="1" placeholder="Amount (msats)" required />
+        <button type="submit">pay</button>
+      </form>
+      <div id="payAddressResult"></div>
+    </div>
+
     <p>Console output:</p>
     <div id="console"></div>
     <p>Faucet Link: <a href="https://faucet.mutinynet.com/" target="_blank">https://faucet.mutinynet.com/</a></p>
@@ -79,6 +99,38 @@
         document.getElementById('createInvoice').addEventListener('click', async () => {
           const createInvoice = await wallet.lightning.createInvoice(1000, "Test Invoice");
           console.log('Invoice Response:', createInvoice);
+        });
+
+        document.getElementById('verifyAddressForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const result = document.getElementById('verifyAddressResult');
+          const address = document.getElementById('verifyAddressInput').value;
+
+          try {
+            await wallet.lightning.verifyLightningAddress(address);
+            result.textContent = 'Verified!';
+            result.className = 'success';
+          } catch (err) {
+            result.textContent = 'Failed!';
+            result.className = 'error';
+          }
+        });
+
+        document.getElementById('payAddressForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const result = document.getElementById('payAddressResult');
+          const address = document.getElementById('payAddressInput').value;
+          const amountMsats = Number(document.getElementById('payAddressAmount').value);
+
+          try {
+            await wallet.lightning.payLightningAddress(address, amountMsats);
+
+            result.textContent = 'Paid!';
+            result.className = 'success';
+          } catch (err) {
+            result.textContent = 'Failed!';
+            result.className = 'error';
+          }
         });
 
       } catch (e) {

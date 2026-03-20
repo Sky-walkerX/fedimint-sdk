@@ -75,6 +75,25 @@
         </div>
 
         <div class="section">
+            <h3>Verify Lightning Address</h3>
+            <form class="row VerifyLightningAddressForm">
+                <input id="verifyLightningAddressInput" type="text" placeholder="name@domain.com" required>
+                <button type="submit">verify</button>
+            </form>
+            <div id="verifyLightningAddressResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>Pay Lightning Address</h3>
+            <form class="row PayLightningAddressForm">
+                <input id="payLightningAddressInput" type="text" placeholder="name@domain.com" required>
+                <input id="payLightningAddressAmount" type="number" min="1" placeholder="Amount (msats)" required>
+                <button type="submit">pay</button>
+            </form>
+            <div id="payLightningAddressResult"></div>
+        </div>
+
+        <div class="section">
             <h3>Generate Lightning Invoice</h3>
             <form class="InvoiceForm">
                 <div class="input-group">

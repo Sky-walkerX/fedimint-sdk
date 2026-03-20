@@ -83,6 +83,8 @@ const App = () => {
         <GenerateLightningInvoice />
         <RedeemEcash />
         <SendLightning />
+        <VerifyLightningAddress />
+        <PayLightningAddress />
         <InviteCodeParser />
         <ParseLightningInvoice />
         <Deposit />
@@ -538,6 +540,92 @@ const SendLightning = () => {
       </form>
       {lightningResult && <div className="success">{lightningResult}</div>}
       {lightningError && <div className="error">{lightningError}</div>}
+    </div>
+  )
+}
+
+const VerifyLightningAddress = () => {
+  const [address, setAddress] = useState('')
+  const [result, setResult] = useState('')
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setResult('')
+    setError('')
+
+    try {
+      if (!wallet) throw new Error('Wallet unavailable')
+      await wallet.lightning.verifyLightningAddress(address)
+      setResult('Verified!')
+    } catch (e) {
+      console.error('Error verifying lightning address', e)
+      setError('Failed!')
+    }
+  }
+
+  return (
+    <div className="section">
+      <h3>Verify Lightning Address</h3>
+      <form onSubmit={handleSubmit} className="row">
+        <input
+          placeholder="name@domain.com"
+          required
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+        />
+        <button type="submit">verify</button>
+      </form>
+      {result && <div className="success">{result}</div>}
+      {error && <div className="error">{error}</div>}
+    </div>
+  )
+}
+
+const PayLightningAddress = () => {
+  const [address, setAddress] = useState('')
+  const [amountMsats, setAmountMsats] = useState('')
+  const [result, setResult] = useState('')
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setResult('')
+    setError('')
+
+    try {
+      if (!wallet) throw new Error('Wallet unavailable')
+      await wallet.lightning.payLightningAddress(address, Number(amountMsats))
+
+      setResult('Paid!')
+    } catch (e) {
+      console.error('Error paying lightning address', e)
+      setError('Failed!')
+    }
+  }
+
+  return (
+    <div className="section">
+      <h3>Pay Lightning Address</h3>
+      <form onSubmit={handleSubmit} className="row">
+        <input
+          placeholder="name@domain.com"
+          required
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+        />
+        <input
+          type="number"
+          min="1"
+          placeholder="Amount (msats)"
+          required
+          value={amountMsats}
+          onChange={(e) => setAmountMsats(e.target.value)}
+        />
+        <button type="submit">pay</button>
+      </form>
+      {result && <div className="success">{result}</div>}
+      {error && <div className="error">{error}</div>}
     </div>
   )
 }

@@ -76,6 +76,39 @@ const sendLightning = async () => {
   }
 }
 
+const verifyLightningAddress = async () => {
+  const address = document.getElementById('verifyLightningAddressInput').value
+  const result = document.getElementById('verifyLightningAddressResult')
+  try {
+    await wallet.lightning.verifyLightningAddress(address)
+    result.innerHTML = 'Verified!'
+    result.style.color = 'green'
+  } catch (e) {
+    console.log('Error verifying lightning address', e)
+    result.innerHTML = 'Failed!'
+    result.style.color = 'red'
+  }
+}
+
+const payLightningAddress = async () => {
+  const address = document.getElementById('payLightningAddressInput').value
+  const amountMsats = Number(
+    document.getElementById('payLightningAddressAmount').value,
+  )
+  const result = document.getElementById('payLightningAddressResult')
+
+  try {
+    await wallet.lightning.payLightningAddress(address, amountMsats)
+
+    result.innerHTML = 'Paid!'
+    result.style.color = 'green'
+  } catch (e) {
+    console.log('Error paying lightning address', e)
+    result.innerHTML = 'Failed!'
+    result.style.color = 'red'
+  }
+}
+
 // generate lightning invoice
 const GenerateLightningInvoice = async () => {
   let Invoiceamount = document.getElementById('Invoiceamount').value
@@ -123,6 +156,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.preventDefault()
     sendLightning()
   })
+  document
+    .querySelector('.VerifyLightningAddressForm')
+    .addEventListener('submit', (e) => {
+      e.preventDefault()
+      verifyLightningAddress()
+    })
+  document
+    .querySelector('.PayLightningAddressForm')
+    .addEventListener('submit', (e) => {
+      e.preventDefault()
+      payLightningAddress()
+    })
   document.querySelector('.InvoiceForm').addEventListener('submit', (e) => {
     e.preventDefault()
     GenerateLightningInvoice()
