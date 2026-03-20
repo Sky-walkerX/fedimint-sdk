@@ -1,18 +1,27 @@
-# Getting Started
-
-::: danger Disclaimer
-This is very new. Use with caution. [Report bugs](https://github.com/fedimint/fedimint-sdk/issues).
-
-APIs may change.
+::: warning LEGACY VERSION 0.0.x
+This is an archived version for testing.
 :::
 
-## Scaffolding your first project
+# Getting Started (LEGACY EDITION)
 
-::: tip Compatibility Note
-Most `create-fedimint-app` templates require [Node.js](https://nodejs.org/en/) version 18+ or 20+.
+::: danger ANCIENT ARTIFACT
+You have entered the archives. The knowledge here is dusty and may crumble upon reading.
+Proceed with caution, digital archaeologist.
 :::
 
-::: code-group
+## The Old Ways
+
+In the time before time (version 0.1.x), we did things differently.
+
+### Legacy Scaffolding
+
+To create an ancient app structure:
+
+```bash
+npm create fedimint-legacy-app
+```
+
+May your latency be low and your uptime high.
 
 ```bash [npm]
 npm create fedimint-app

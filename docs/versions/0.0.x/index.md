@@ -7,13 +7,13 @@ title: Fedimint Sdk
 titleTemplate: false
 
 hero:
-  name: Fedimint Sdk
-  text: Building Ecash into Apps
-  tagline: Robust, privacy-focused, and WebAssembly-powered
+  name: Fedimint Sdk (Legacy)
+  text: Legacy Documentation Snapshot
+  tagline: Archived view for testing versioned docs navigation
   actions:
     - theme: brand
-      text: Get Started
-      link: /core/getting-started
+      text: Open Legacy Getting Started
+      link: /0.0.x/core/getting-started
     - theme: alt
       text: Learn about Fedimint
       link: https://fedimint.org
@@ -27,8 +27,8 @@ hero:
 
 features:
   - icon: 🚀
-    title: Rust-powered Client
-    details: Exposes the robust, fault-tolerant fedimint-client (built in Rust) via WebAssembly/native modules. Lazy loading included for performance.
+    title: Legacy Snapshot
+    details: This is intentionally older documentation content for validating version-switch behavior.
   - icon: 💰
     title: Ecash Payments
     details: Includes support for joining federations, sending/receiving ecash, and managing balances.
@@ -45,3 +45,9 @@ features:
     title: Framework Agnostic
     details: Designed as a "core" library compatible with vanilla JavaScript, laying the groundwork for future framework-specific packages.
 ---
+
+::: warning Legacy Documentation (Testing)
+You are currently viewing the legacy test version `0.0.x`.
+
+Use the version switcher to return to the latest docs (`0.1.x`).
+:::
