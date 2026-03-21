@@ -1,22 +1,53 @@
 import { Feather } from '@expo/vector-icons'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
 import { ActionButton } from '../src/components/ActionButton'
 import { AppScreen } from '../src/components/AppScreen'
+import { useFedimint } from '../src/hooks/useFedimint'
 import { Panel } from '../src/components/Panel'
-import { toMockInvoice } from '../src/mocks/wallet'
 import { palette } from '../src/theme/palette'
 
 export default function ReceiveScreen() {
+  const { wallet } = useFedimint()
   const [amountInput, setAmountInput] = useState('21000')
+  const [generatedInvoice, setGeneratedInvoice] = useState<string | null>(null)
+  const [invoiceOperationId, setInvoiceOperationId] = useState<string | null>(
+    null,
+  )
+  const [screenError, setScreenError] = useState<string | null>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
 
   const amountSats = Number.parseInt(amountInput, 10)
   const safeAmountSats =
     Number.isFinite(amountSats) && amountSats > 0 ? amountSats : 0
 
-  const mockInvoice = useMemo(() => {
-    return toMockInvoice(safeAmountSats)
-  }, [safeAmountSats])
+  const handleGenerateInvoice = async () => {
+    if (!wallet || safeAmountSats <= 0) {
+      return
+    }
+
+    setIsGenerating(true)
+    setScreenError(null)
+    setGeneratedInvoice(null)
+    setInvoiceOperationId(null)
+
+    try {
+      const amountMsats = safeAmountSats * 1000
+      const response = await wallet.lightning.createInvoice(
+        amountMsats,
+        'Expo wallet receive',
+      )
+
+      setGeneratedInvoice(response.invoice)
+      setInvoiceOperationId(response.operation_id)
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Failed to generate invoice'
+      setScreenError(message)
+    } finally {
+      setIsGenerating(false)
+    }
+  }
 
   return (
     <AppScreen>
@@ -42,15 +73,25 @@ export default function ReceiveScreen() {
             <Text style={styles.qrPlaceholderText}>QR placeholder</Text>
           </View>
 
-          <Text style={styles.invoiceLabel}>Generated Invoice (mock)</Text>
+          <Text style={styles.invoiceLabel}>Generated Invoice</Text>
           <Text numberOfLines={2} style={styles.invoiceText}>
-            {mockInvoice}
+            {generatedInvoice ?? 'No invoice generated yet'}
           </Text>
+
+          {invoiceOperationId ? (
+            <Text style={styles.operationText}>
+              Operation ID: {invoiceOperationId}
+            </Text>
+          ) : null}
+
+          {screenError ? (
+            <Text style={styles.errorText}>{screenError}</Text>
+          ) : null}
 
           <View style={styles.actionStack}>
             <ActionButton
-              label="Generate Invoice"
-              onPress={() => undefined}
+              label={isGenerating ? 'Generating...' : 'Generate Invoice'}
+              onPress={() => void handleGenerateInvoice()}
               icon={<Feather name="plus-circle" size={18} color="#FFFFFF" />}
             />
           </View>
@@ -121,6 +162,16 @@ const styles = StyleSheet.create({
     color: palette.textPrimary,
     fontSize: 14,
     marginTop: 4,
+  },
+  operationText: {
+    color: palette.success,
+    marginTop: 8,
+    fontSize: 12,
+  },
+  errorText: {
+    color: palette.danger,
+    marginTop: 8,
+    fontSize: 12,
   },
   actionStack: {
     marginTop: 14,

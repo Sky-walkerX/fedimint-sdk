@@ -1,17 +1,51 @@
 import { Feather } from '@expo/vector-icons'
 import { router } from 'expo-router'
+import { useCallback, useEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { ActionButton } from '../../src/components/ActionButton'
 import { AppScreen } from '../../src/components/AppScreen'
 import { Panel } from '../../src/components/Panel'
-import {
-  formatSats,
-  mockBalanceSats,
-  mockTransactions,
-} from '../../src/mocks/wallet'
+import { formatSats } from '../../src/mocks/wallet'
+import { useFedimint } from '../../src/hooks/useFedimint'
 import { palette } from '../../src/theme/palette'
 
 export default function OverviewScreen() {
+  const { wallet, isInitializing, initError } = useFedimint()
+  const [balanceMsats, setBalanceMsats] = useState(0)
+  const [txCount, setTxCount] = useState(0)
+  const [latestOutcome, setLatestOutcome] = useState('n/a')
+  const [refreshError, setRefreshError] = useState<string | null>(null)
+
+  const refreshOverview = useCallback(async () => {
+    if (!wallet) {
+      return
+    }
+
+    setRefreshError(null)
+    try {
+      const [nextBalance, transactions] = await Promise.all([
+        wallet.balance.getBalance(),
+        wallet.federation.listTransactions(20),
+      ])
+
+      setBalanceMsats(nextBalance)
+      setTxCount(transactions.length)
+      setLatestOutcome(transactions[0]?.outcome ?? 'n/a')
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to refresh overview data'
+      setRefreshError(message)
+    }
+  }, [wallet])
+
+  useEffect(() => {
+    void refreshOverview()
+  }, [refreshOverview])
+
+  const balanceSats = Math.floor(balanceMsats / 1000)
+
   return (
     <AppScreen>
       <View style={styles.container}>
@@ -20,24 +54,42 @@ export default function OverviewScreen() {
 
         <Panel>
           <Text style={styles.balanceLabel}>Total Balance</Text>
-          <Text style={styles.balanceValue}>{formatSats(mockBalanceSats)}</Text>
-          <Text style={styles.balanceHint}>Mock data for UI-only Step 2</Text>
+          <Text style={styles.balanceValue}>{formatSats(balanceSats)}</Text>
+          <Text style={styles.balanceHint}>
+            {isInitializing
+              ? 'Initializing Fedimint client...'
+              : initError
+                ? initError
+                : refreshError
+                  ? refreshError
+                  : 'Live data from SDK'}
+          </Text>
         </Panel>
 
         <View style={styles.row}>
           <Panel style={styles.metricPanel}>
             <Text style={styles.metricLabel}>Transactions</Text>
-            <Text style={styles.metricValue}>{mockTransactions.length}</Text>
+            <Text style={styles.metricValue}>{txCount}</Text>
           </Panel>
           <Panel style={styles.metricPanel}>
             <Text style={styles.metricLabel}>Latest</Text>
-            <Text style={styles.metricValue}>
-              {mockTransactions[0]?.status ?? 'n/a'}
-            </Text>
+            <Text style={styles.metricValue}>{latestOutcome}</Text>
           </Panel>
         </View>
 
         <View style={styles.actions}>
+          <ActionButton
+            label="Refresh"
+            variant="secondary"
+            onPress={() => void refreshOverview()}
+            icon={
+              <Feather
+                color={palette.textPrimary}
+                name="refresh-cw"
+                size={18}
+              />
+            }
+          />
           <ActionButton
             label="Send"
             onPress={() => router.push('/send')}
