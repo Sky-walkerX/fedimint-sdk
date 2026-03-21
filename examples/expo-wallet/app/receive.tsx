@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons'
 import { useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
+import QRCode from 'react-native-qrcode-svg'
 import { ActionButton } from '../src/components/ActionButton'
 import { AppScreen } from '../src/components/AppScreen'
 import { useFedimint } from '../src/hooks/useFedimint'
@@ -69,8 +70,18 @@ export default function ReceiveScreen() {
           />
 
           <View style={styles.qrPlaceholder}>
-            <Feather name="grid" size={70} color={palette.tabInactive} />
-            <Text style={styles.qrPlaceholderText}>QR placeholder</Text>
+            {generatedInvoice ? (
+              <View style={styles.qrCodeCard}>
+                <QRCode value={generatedInvoice} size={180} />
+              </View>
+            ) : (
+              <>
+                <Feather name="grid" size={70} color={palette.tabInactive} />
+                <Text style={styles.qrPlaceholderText}>
+                  Generate invoice to render QR
+                </Text>
+              </>
+            )}
           </View>
 
           <Text style={styles.invoiceLabel}>Generated Invoice</Text>
@@ -144,6 +155,11 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
     gap: 10,
     backgroundColor: palette.inputBg,
+  },
+  qrCodeCard: {
+    backgroundColor: '#FFFFFF',
+    padding: 12,
+    borderRadius: 10,
   },
   qrPlaceholderText: {
     color: palette.textSecondary,

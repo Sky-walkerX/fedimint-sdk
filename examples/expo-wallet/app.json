@@ -5,7 +5,16 @@
     "scheme": "fedimintwallet",
     "version": "1.0.0",
     "orientation": "portrait",
-    "plugins": ["expo-router", "@fedimint/react-native"],
+    "plugins": [
+      "expo-router",
+      "@fedimint/react-native",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Fedimint Wallet to scan Lightning invoices"
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     },
