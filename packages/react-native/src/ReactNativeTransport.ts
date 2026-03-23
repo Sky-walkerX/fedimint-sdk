@@ -19,7 +19,7 @@ export class ReactNativeTransport extends Transport {
   }
 
   async postMessage(message: TransportRequest): Promise<void> {
-    console.log(
+    this.logger.info(
       'ReactNativeTransport postMessage received:',
       JSON.stringify(message),
     )
@@ -51,39 +51,65 @@ export class ReactNativeTransport extends Transport {
         type === 'has_mnemonic_set'
       ) {
         const rustRequest = {
-          type: type,
           request_id: requestId,
-          payload: payload ?? null,
+          type: type,
+          ...(typeof payload === 'object' && payload !== null ? payload : {}),
         }
         const json = JSON.stringify(rustRequest)
-        console.log('ReactNativeTransport sending RPC:', json)
+        console.info('ReactNativeTransport sending RPC:', json)
 
-        const responseStr = await new Promise<string>((resolve, reject) => {
-          try {
-            const callback = {
-              onResponse: (response: string) => {
-                resolve(response)
-              },
+        const callback = {
+          onResponse: (responseStr: string) => {
+            try {
+              const response = JSON.parse(responseStr)
+              console.info(
+                'ReactNativeTransport RPC parsed response:',
+                JSON.stringify(response),
+              )
+
+              if (response.type === 'error') {
+                this.messageHandler({
+                  type: 'error',
+                  error: response.error || 'Unknown RPC error',
+                  request_id: requestId,
+                })
+                this.errorHandler(
+                  new Error(response.error || 'Unknown RPC error'),
+                )
+                return
+              }
+
+              // Forward the full Rust response (data, end, aborted)
+              // directly to the messageHandler
+              this.messageHandler(response)
+            } catch (parseError) {
+              this.logger.error('RPC response parse error', parseError)
+              this.messageHandler({
+                type: 'error',
+                error:
+                  parseError instanceof Error
+                    ? parseError.message
+                    : String(parseError),
+                request_id: requestId,
+              })
+              this.errorHandler(parseError)
             }
-            this.rpcHandler.rpc(json, callback)
-          } catch (e) {
-            reject(e)
-          }
-        })
-        console.log('ReactNativeTransport RPC raw response:', responseStr)
-
-        const response = JSON.parse(responseStr)
-        console.log(
-          'ReactNativeTransport RPC parsed response:',
-          JSON.stringify(response),
-        )
-        if (response.type === 'error') {
-          throw new Error(response.error || 'Unknown RPC error')
+          },
         }
 
-        this.messageHandler(response)
+        try {
+          this.rpcHandler.rpc(json, callback)
+        } catch (e) {
+          this.logger.error('RPC call error', e)
+          this.messageHandler({
+            type: 'error',
+            error: e instanceof Error ? e.message : String(e),
+            request_id: requestId,
+          })
+          this.errorHandler(e)
+        }
       } else if (type === 'cleanup') {
-        console.log('cleanup message received')
+        this.logger.info('cleanup message received')
         this.rpcHandler.uniffiDestroy()
       } else {
         this.logger.error('Unknown message type', type)
