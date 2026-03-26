@@ -147,6 +147,22 @@ export class WalletDirector {
   }
 
   /**
+   * Verifies and parses a Lightning Address.
+   *
+   * This method is exposed by the global transport RPC surface and does not
+   * require an opened wallet client.
+   *
+   * @param {string} address - Lightning Address in the form user@domain.
+   * @returns {Promise<unknown>} Parsed LNURL pay metadata from the client.
+   */
+  async verifyLightningAddress(address: string): Promise<unknown> {
+    await this._client.initialize()
+    return await this._client.sendSingleMessage('parse_lightning_address', {
+      address,
+    })
+  }
+
+  /**
    * Generates and sets a new mnemonic phrase.
    * @returns {Promise<string[]>} A promise that resolves to the generated mnemonic phrase.
    */

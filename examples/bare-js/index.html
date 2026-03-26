@@ -68,6 +68,7 @@
     ////////////////////////////////
 
     let wallet;
+    const director = new WalletDirector(new WasmWorkerTransport());
     const TESTNET_INVITE_CODE = 'fed11qgqzc2nhwden5te0vejkg6tdd9h8gepwvejkg6tdd9h8garhduhx6at5d9h8jmn9wshxxmmd9uqqzgxg6s3evnr6m9zdxr6hxkdkukexpcs3mn7mj3g5pc5dfh63l4tj6g9zk4er';
 
     (async () => {
@@ -107,7 +108,7 @@
           const address = document.getElementById('verifyAddressInput').value;
 
           try {
-            await wallet.lightning.verifyLightningAddress(address);
+            await director.verifyLightningAddress(address);
             result.textContent = 'Verified!';
             result.className = 'success';
           } catch (err) {

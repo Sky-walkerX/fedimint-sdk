@@ -1,11 +1,12 @@
 # Verify Lightning Address
 
-### `lightning.verifyLightningAddress(address: string)`
+### `director.verifyLightningAddress(address: string)`
 
 Verifies a Lightning Address and returns LNURL-pay metadata.
 
 The response typically includes fields like `callback`, `minSendable`, and `maxSendable`.
 
+<!-- prettier-ignore -->
 ```ts twoslash
 // @esModuleInterop
 import { WalletDirector } from '@fedimint/core'
@@ -16,7 +17,7 @@ const wallet = await director.createWallet()
 
 await wallet.open()
 
-const response = await wallet.lightning.verifyLightningAddress(
+const response = await director.verifyLightningAddress(
   // [!code focus]
   'name@domain.com', // [!code focus]
 ) // [!code focus]

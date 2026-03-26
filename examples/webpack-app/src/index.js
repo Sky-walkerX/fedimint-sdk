@@ -1,4 +1,4 @@
-import { wallet } from './wallet.js'
+import { wallet, director } from './wallet.js'
 import './style.css' // Load CSS
 
 const TESTNET_FEDERATION_CODE =
@@ -80,7 +80,7 @@ const verifyLightningAddress = async () => {
   const address = document.getElementById('verifyLightningAddressInput').value
   const result = document.getElementById('verifyLightningAddressResult')
   try {
-    await wallet.lightning.verifyLightningAddress(address)
+    await director.verifyLightningAddress(address)
     result.innerHTML = 'Verified!'
     result.style.color = 'green'
   } catch (e) {

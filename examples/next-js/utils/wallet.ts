@@ -1,6 +1,8 @@
-import { FedimintWallet } from '@fedimint/core'
+import { FedimintWallet, WalletDirector } from '@fedimint/core'
+import { WasmWorkerTransport } from '@fedimint/transport-web'
 
 let wallet: FedimintWallet
+const director = new WalletDirector(new WasmWorkerTransport())
 
 if (typeof window !== 'undefined') {
   wallet = new FedimintWallet()
@@ -11,4 +13,4 @@ if (typeof window !== 'undefined') {
   // globalThis.wallet = wallet
 }
 
-export { wallet }
+export { wallet, director }

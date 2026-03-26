@@ -61,6 +61,7 @@ export const TRANSPORT_MESSAGE_TYPES = [
   'cancel_rpc',
   'parse_invite_code',
   'parse_bolt11_invoice',
+  'parse_lightning_address',
   'preview_federation',
   'parse_oob_notes',
   'has_mnemonic_set',

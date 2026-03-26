@@ -16,15 +16,6 @@ export class LightningService {
     private clientName: string,
   ) {}
 
-  async verifyLightningAddress(address: string) {
-    return await this.client.rpcSingle(
-      '',
-      'parse_lightning_address',
-      { address },
-      this.clientName,
-    )
-  }
-
   async payLightningAddress(address: string, amountMsats: number) {
     return await this.client.rpcSingle(
       'ln',

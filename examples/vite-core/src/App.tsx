@@ -556,7 +556,7 @@ const VerifyLightningAddress = () => {
 
     try {
       if (!wallet) throw new Error('Wallet unavailable')
-      await wallet.lightning.verifyLightningAddress(address)
+      await director.verifyLightningAddress(address)
       setResult('Verified!')
     } catch (e) {
       console.error('Error verifying lightning address', e)
