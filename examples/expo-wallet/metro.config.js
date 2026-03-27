@@ -11,6 +11,7 @@ config.resolver.nodeModulesPaths = [
   path.resolve(__dirname, 'node_modules'),
   path.resolve(root, 'node_modules'),
 ]
+config.resolver.disableHierarchicalLookup = true
 
 // Map all workspace packages to their source directories
 config.resolver.extraNodeModules = {
