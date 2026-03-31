@@ -5,4 +5,4 @@
 '@fedimint/transport-web': patch
 ---
 
-Add verifyLightningAddress and payLightningAddress to the LightningService
+Add payLightningAddress to LightningService and verifyLightningAddress to WalletDirector

@@ -17,20 +17,12 @@ const wallet = await director.createWallet()
 
 await wallet.open()
 
-const response = await director.verifyLightningAddress(
+const lnurl = await director.verifyLightningAddress(
   // [!code focus]
   'name@domain.com', // [!code focus]
 ) // [!code focus]
 
-if (typeof response === 'object' && response) {
-  const lnurl = response as {
-    callback?: string
-    minSendable?: number
-    maxSendable?: number
-  }
-
-  console.log(lnurl.callback) // callback URL to request invoice
-  console.log(lnurl.minSendable) // minimum amount in msats
-  console.log(lnurl.maxSendable) // maximum amount in msats
-}
+console.log(lnurl.callback) // callback URL to request invoice
+console.log(lnurl.minSendable) // minimum amount in msats
+console.log(lnurl.maxSendable) // maximum amount in msats
 ```

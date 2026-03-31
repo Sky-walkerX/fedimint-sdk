@@ -253,6 +253,14 @@ type Transactions = LightningTransaction | EcashTransaction | WalletTransaction
 /** Keys are powers of 2 */
 type NoteCountByDenomination = Record<number, number>
 
+type LnurlPayMetadata = {
+  callback: string
+  maxSendable: number
+  metadata: string
+  minSendable: number
+  tag: string
+}
+
 type GenerateAddressResponse = {
   deposit_address: string
   operation_id: string
@@ -291,4 +299,5 @@ export {
   WalletTransaction,
   Transactions,
   WalletDepositState,
+  LnurlPayMetadata,
 }

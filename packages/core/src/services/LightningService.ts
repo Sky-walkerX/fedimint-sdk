@@ -8,6 +8,7 @@ import type {
   LnPayState,
   LnReceiveState,
   OutgoingLightningPayment,
+  LnurlPayMetadata,
 } from '../types'
 
 export class LightningService {
@@ -16,8 +17,9 @@ export class LightningService {
     private clientName: string,
   ) {}
 
+  /** https://sdk.fedimint.org/core/FedimintWallet/LightningService/payLightningAddress */
   async payLightningAddress(address: string, amountMsats: number) {
-    return await this.client.rpcSingle(
+    return await this.client.rpcSingle<OutgoingLightningPayment>(
       'ln',
       'pay_lightning_address',
       {

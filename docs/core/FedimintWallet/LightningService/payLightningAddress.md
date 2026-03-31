@@ -16,32 +16,16 @@ const wallet = await director.createWallet()
 
 await wallet.open()
 
-const response = await wallet.lightning.payLightningAddress(
+const payment = await wallet.lightning.payLightningAddress(
   // [!code focus]
   'name@domain.com', // [!code focus]
   10_000, // msats // [!code focus]
 ) // [!code focus]
 
-if (
-  typeof response !== 'object' ||
-  !response ||
-  !('contract_id' in response) ||
-  !('fee' in response) ||
-  !('payment_type' in response)
-) {
-  throw new Error('Unexpected payment response')
-}
-
-const payment = response as {
-  contract_id: string
-  fee: number
-  payment_type: { lightning?: string; internal?: string }
-}
-
 console.log(payment.contract_id)
 console.log(payment.fee)
 
-if (payment.payment_type.lightning) {
+if ('lightning' in payment.payment_type) {
   const operationId = payment.payment_type.lightning
   const result = await wallet.lightning.waitForPay(operationId) // [!code focus]
   if (result.success) {

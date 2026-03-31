@@ -101,6 +101,10 @@ const FedimintWalletSidebar = [
         link: 'hasMnemonicSet',
       },
       {
+        text: 'verifyLightningAddress()',
+        link: 'verifyLightningAddress',
+      },
+      {
         text: 'BalanceService',
         base: '/core/FedimintWallet/BalanceService/',
         items: [
@@ -118,10 +122,6 @@ const FedimintWalletSidebar = [
             link: 'payLightningAddress',
           },
           { text: 'createInvoice()', link: 'createInvoice' },
-          {
-            text: 'verifyLightningAddress(address)',
-            link: 'verifyLightningAddress',
-          },
           // {
           //   text: 'createInvoiceWithGateway()',
           //   link: 'createInvoiceWithGateway',

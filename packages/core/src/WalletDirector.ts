@@ -7,6 +7,7 @@ import {
   PreviewFederation,
   ParsedNoteDetails,
 } from '@fedimint/types'
+import type { LnurlPayMetadata } from './types'
 import { FedimintWallet } from './FedimintWallet'
 
 export class WalletDirector {
@@ -153,13 +154,16 @@ export class WalletDirector {
    * require an opened wallet client.
    *
    * @param {string} address - Lightning Address in the form user@domain.
-   * @returns {Promise<unknown>} Parsed LNURL pay metadata from the client.
+   * @returns {Promise<LnurlPayMetadata>} Parsed LNURL pay metadata from the client.
    */
-  async verifyLightningAddress(address: string): Promise<unknown> {
+  async verifyLightningAddress(address: string): Promise<LnurlPayMetadata> {
     await this._client.initialize()
-    return await this._client.sendSingleMessage('parse_lightning_address', {
-      address,
-    })
+    return await this._client.sendSingleMessage<LnurlPayMetadata>(
+      'parse_lightning_address',
+      {
+        address,
+      },
+    )
   }
 
   /**

@@ -46,6 +46,7 @@ export class ReactNativeTransport extends Transport {
         type === 'cancel_rpc' ||
         type === 'parse_invite_code' ||
         type === 'parse_bolt11_invoice' ||
+        type === 'parse_lightning_address' ||
         type === 'preview_federation' ||
         type === 'parse_oob_notes' ||
         type === 'has_mnemonic_set'
