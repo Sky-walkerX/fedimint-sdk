@@ -1,12 +1,12 @@
 {
-  "name": "vite-svelte",
+  "name": "sveltekit",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "svelte-kit sync && vite dev",
     "build": "svelte-kit sync && vite build",
     "preview": "svelte-kit sync && vite preview",
-    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "clean": "rm -rf .svelte-kit build dist tsconfig.tsbuildinfo",
     "clean:deep": "pnpm run clean && rm -rf node_modules"
   },
   "dependencies": {

@@ -6,7 +6,7 @@ aside: false
 
 This is an example application demonstrating the usage of Fedimint client in a SvelteKit application.
 
-[Code on Github](https://github.com/fedimint/fedimint-sdk/tree/main/examples/vite-svelte)
+[Code on Github](https://github.com/fedimint/fedimint-sdk/tree/main/examples/sveltekit)
 
 ## Live Preview
 
@@ -14,9 +14,9 @@ This is an example application demonstrating the usage of Fedimint client in a S
 You might need to disable your adblocker or Brave Shields to see the preview.
 :::
 
-<iframe src="https://stackblitz.com/github/fedimint/fedimint-sdk/tree/main/examples/vite-svelte?embed=1&theme=dark&file=src%2Froutes%2F%2Bpage.svelte" style="width: 100%; height: 600px; border: 0;"></iframe>
+<iframe src="https://stackblitz.com/github/fedimint/fedimint-sdk/tree/main/examples/sveltekit?embed=1&theme=dark&file=src%2Froutes%2F%2Bpage.svelte" style="width: 100%; height: 600px; border: 0;"></iframe>
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/fedimint/fedimint-sdk/tree/main/examples/vite-svelte)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/fedimint/fedimint-sdk/tree/main/examples/sveltekit)
 
 ## Running the Example Locally
 

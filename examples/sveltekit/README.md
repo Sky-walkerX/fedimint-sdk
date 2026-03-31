@@ -4,9 +4,9 @@ This is an example application demonstrating the usage of Fedimint client in a S
 
 ## Deploy preview
 
-You can preview this example live with [StackBlitz](https://stackblitz.com/github/fedimint/fedimint-sdk/tree/main/examples/vite-svelte?file=src%2Froutes%2F%2Bpage.svelte)
+You can preview this example live with [StackBlitz](https://stackblitz.com/github/fedimint/fedimint-sdk/tree/main/examples/sveltekit?file=src%2Froutes%2F%2Bpage.svelte)
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/fedimint/fedimint-sdk/tree/main/examples/vite-svelte?file=src%2Froutes%2F%2Bpage.svelte)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/fedimint/fedimint-sdk/tree/main/examples/sveltekit?file=src%2Froutes%2F%2Bpage.svelte)
 
 ## Technologies Used
 

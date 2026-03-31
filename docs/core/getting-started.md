@@ -165,7 +165,7 @@ module.exports = {
 
 :::
 
-### Svelte
+### SvelteKit
 
 ::: details SvelteKit Setup
 
@@ -218,7 +218,7 @@ export default defineConfig({
 })
 ```
 
-Check out the [SvelteKit sample app](../examples/vite-svelte) for a full working example.
+Check out the [SvelteKit sample app](../examples/sveltekit) for a full working example.
 
 :::
 
@@ -354,7 +354,7 @@ console.log('Total amount:', parsedNotes.total_amount)
 
 ## Examples
 
-Check out an example app using [Vite + React](../examples/vite-react.md), [SvelteKit](../examples/vite-svelte.md), or other [examples](../examples/bare-js.md).
+Check out an example app using [Vite + React](../examples/vite-react.md), [SvelteKit](../examples/sveltekit.md), or other [examples](../examples/bare-js.md).
 
 Check out an example app using [VanillaJS + HTML](../examples/bare-js.md).
 
