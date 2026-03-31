@@ -80,8 +80,8 @@ const verifyLightningAddress = async () => {
   const address = document.getElementById('verifyLightningAddressInput').value
   const result = document.getElementById('verifyLightningAddressResult')
   try {
-    await director.verifyLightningAddress(address)
-    result.innerHTML = 'Verified!'
+    const metadata = await director.verifyLightningAddress(address)
+    result.innerHTML = `Verified! minSendable: ${metadata.minSendable} msats, maxSendable: ${metadata.maxSendable} msats`
     result.style.color = 'green'
   } catch (e) {
     console.log('Error verifying lightning address', e)

@@ -6,6 +6,7 @@ Attempts to pay a Lightning Address by first negotiating a BOLT11 invoice over L
 
 `amountMsats` must be in milli-satoshis and within the receiver's allowed LNURL range.
 
+<!-- prettier-ignore -->
 ```ts twoslash
 // @esModuleInterop
 import { WalletDirector } from '@fedimint/core'

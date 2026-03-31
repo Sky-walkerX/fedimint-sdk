@@ -108,8 +108,8 @@
           const address = document.getElementById('verifyAddressInput').value;
 
           try {
-            await director.verifyLightningAddress(address);
-            result.textContent = 'Verified!';
+            const metadata = await director.verifyLightningAddress(address);
+            result.textContent = `Verified! minSendable: ${metadata.minSendable} msats, maxSendable: ${metadata.maxSendable} msats`;
             result.className = 'success';
           } catch (err) {
             result.textContent = 'Failed!';
