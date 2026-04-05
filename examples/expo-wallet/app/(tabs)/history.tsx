@@ -3,12 +3,33 @@ import { View, Text, FlatList, RefreshControl } from 'react-native'
 import { wallet } from '../../src/wallet'
 import { SectionCard, SectionTitle } from '../../src/components'
 import s from '../../src/styles'
+import type { OperationKey, OperationLog } from '@fedimint/core'
 
 type Transaction = {
-  txid: string
-  txType: string
+  operationId: string
+  moduleKind: string
   amount: number
   timestamp: number
+}
+
+function getVariantLabel(log: OperationLog): string {
+  const variant = log.meta?.variant
+  if (!variant) return log.operation_module_kind
+  if ('pay' in variant && variant.pay) return 'ln_pay'
+  if ('receive' in variant && variant.receive) return 'ln_receive'
+  if ('spend_o_o_b' in variant && variant.spend_o_o_b) return 'mint_spend'
+  if ('reissuance' in variant && variant.reissuance) return 'mint_reissue'
+  if ('deposit' in variant && variant.deposit) return 'wallet_deposit'
+  if ('withdraw' in variant && variant.withdraw) return 'wallet_withdraw'
+  return log.operation_module_kind
+}
+
+function isIncomingVariant(label: string): boolean {
+  return (
+    label === 'ln_receive' ||
+    label === 'mint_reissue' ||
+    label === 'wallet_deposit'
+  )
 }
 
 export default function HistoryScreen() {
@@ -24,12 +45,13 @@ export default function HistoryScreen() {
         setTransactions([])
         return
       }
-      const ops = await wallet.federation.listOperations()
-      const txList: Transaction[] = (ops ?? []).map((op: any) => ({
-        txid: op.id ?? op.operation_id ?? '',
-        txType: op.operationType ?? op.operation_type ?? 'unknown',
-        amount: op.amount ?? 0,
-        timestamp: op.createdAt ?? op.created_at ?? 0,
+      const ops: [OperationKey, OperationLog][] =
+        (await wallet.federation.listOperations()) ?? []
+      const txList: Transaction[] = ops.map(([key, log]) => ({
+        operationId: key.operation_id,
+        moduleKind: getVariantLabel(log),
+        amount: log.meta?.amount ?? 0,
+        timestamp: key.creation_time?.secs_since_epoch ?? 0,
       }))
       setTransactions(txList)
     } catch (e) {
@@ -40,20 +62,20 @@ export default function HistoryScreen() {
   }, [])
 
   const renderItem = ({ item }: { item: Transaction }) => {
-    const isIncoming =
-      item.txType === 'ln_receive' ||
-      item.txType === 'receive' ||
-      item.txType === 'mint'
-    const sign = isIncoming ? '+' : '-'
+    const incoming = isIncomingVariant(item.moduleKind)
+    const sign = incoming ? '+' : '-'
+    const sats = Math.floor(item.amount / 1000)
+    const remainderMsats = item.amount % 1000
 
     return (
       <View style={s.txItem}>
-        <Text style={[s.txType, isIncoming ? s.txIncoming : s.txOutgoing]}>
-          {item.txType}
+        <Text style={[s.txType, incoming ? s.txIncoming : s.txOutgoing]}>
+          {item.moduleKind}
         </Text>
         <Text style={s.txAmount}>
           {sign}
-          {item.amount} msats
+          {sats}
+          {remainderMsats > 0 ? `.${remainderMsats}` : ''} sats
         </Text>
         {item.timestamp > 0 && (
           <Text style={s.txDate}>
@@ -68,7 +90,7 @@ export default function HistoryScreen() {
     <View style={s.container}>
       <FlatList
         data={transactions}
-        keyExtractor={(item) => item.txid}
+        keyExtractor={(item) => item.operationId}
         renderItem={renderItem}
         contentContainerStyle={[
           s.contentContainer,
