@@ -40,7 +40,15 @@ export const useBalance = (checkIsOpen: () => void | Promise<void>) => {
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined
-    walletReady.then((w) => {
+    let cancelled = false
+    walletReady.then(async (w) => {
+      // Wait until the wallet is actually open (joined to a federation)
+      await w.waitForOpen()
+      if (cancelled) return
+      // Fetch current balance immediately
+      const current = await w.balance.getBalance()
+      if (!cancelled && typeof current === 'number') setBalance(current)
+      // Then subscribe to changes
       unsubscribe = w.balance.subscribeBalance((bal: number) => {
         checkIsOpen()
         setBalance(bal)
@@ -48,6 +56,7 @@ export const useBalance = (checkIsOpen: () => void | Promise<void>) => {
     })
 
     return () => {
+      cancelled = true
       unsubscribe?.()
     }
   }, [checkIsOpen])
@@ -56,10 +65,11 @@ export const useBalance = (checkIsOpen: () => void | Promise<void>) => {
 }
 
 export const extractErrorMessage = (error: any): string => {
+  if (typeof error === 'string') return error
   if (error instanceof Error) return error.message
   if (typeof error === 'object' && error !== null) {
-    if (error.error) return error.error
-    if (error.message) return error.message
+    if (error.error) return String(error.error)
+    if (error.message) return String(error.message)
   }
   return 'Operation failed'
 }

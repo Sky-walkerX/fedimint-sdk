@@ -167,7 +167,7 @@ export default function WalletOverview() {
       <SectionCard>
         <SectionTitle>Balance</SectionTitle>
         <Text style={s.balanceLarge}>{balance}</Text>
-        <Text style={s.balanceLabel}>sats</Text>
+        <Text style={s.balanceLabel}>msats</Text>
 
         <Row>
           <Text style={s.label}>Wallet Status:</Text>

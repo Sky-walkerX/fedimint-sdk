@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import { director } from '../src/wallet'
+import { director, walletReady } from '../src/wallet'
 import SplashScreen from '../src/screens/SplashScreen'
 import OnboardingScreen from '../src/screens/OnboardingScreen'
 
@@ -13,6 +13,7 @@ export default function RootLayout() {
   const checkMnemonic = useCallback(async () => {
     setPhase('checking')
     try {
+      await walletReady
       const has = await director.hasMnemonicSet()
       setPhase(has ? 'ready' : 'onboarding')
     } catch {

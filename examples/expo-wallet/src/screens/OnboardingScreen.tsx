@@ -90,7 +90,13 @@ function MnemonicStep({ onComplete }: { onComplete: () => void }) {
       setMessage({ text: 'Mnemonic saved!', type: 'success' })
       setTimeout(onComplete, 600)
     } catch (error) {
-      setMessage({ text: extractErrorMessage(error), type: 'error' })
+      const msg = extractErrorMessage(error)
+      if (msg.toLowerCase().includes('already exists')) {
+        setMessage({ text: 'Mnemonic already set!', type: 'success' })
+        setTimeout(onComplete, 600)
+      } else {
+        setMessage({ text: msg, type: 'error' })
+      }
     } finally {
       setLoading(false)
     }
@@ -106,7 +112,13 @@ function MnemonicStep({ onComplete }: { onComplete: () => void }) {
       setMessage({ text: 'Mnemonic imported!', type: 'success' })
       setTimeout(onComplete, 600)
     } catch (error) {
-      setMessage({ text: extractErrorMessage(error), type: 'error' })
+      const msg = extractErrorMessage(error)
+      if (msg.toLowerCase().includes('already exists')) {
+        setMessage({ text: 'Mnemonic already set!', type: 'success' })
+        setTimeout(onComplete, 600)
+      } else {
+        setMessage({ text: msg, type: 'error' })
+      }
     } finally {
       setLoading(false)
     }
