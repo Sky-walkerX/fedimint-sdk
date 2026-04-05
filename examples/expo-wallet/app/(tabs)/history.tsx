@@ -64,8 +64,11 @@ export default function HistoryScreen() {
   const renderItem = ({ item }: { item: Transaction }) => {
     const incoming = isIncomingVariant(item.moduleKind)
     const sign = incoming ? '+' : '-'
-    const sats = Math.floor(item.amount / 1000)
-    const remainderMsats = item.amount % 1000
+    const satsValue = item.amount / 1000
+    const satsStr =
+      satsValue % 1 === 0
+        ? String(Math.floor(satsValue))
+        : satsValue.toFixed(3).replace(/0+$/, '')
 
     return (
       <View style={s.txItem}>
@@ -74,8 +77,7 @@ export default function HistoryScreen() {
         </Text>
         <Text style={s.txAmount}>
           {sign}
-          {sats}
-          {remainderMsats > 0 ? `.${remainderMsats}` : ''} sats
+          {satsStr} sats
         </Text>
         {item.timestamp > 0 && (
           <Text style={s.txDate}>

@@ -7,11 +7,14 @@ const dbPath = `${RNFS.DocumentDirectoryPath}/fedimint_db`
 const director = new WalletDirector(dbPath)
 let wallet: FedimintWallet | undefined
 
-director.createWallet().then((_wallet) => {
-  console.log('Creating wallet...')
-  wallet = _wallet
-})
+const walletReady: Promise<FedimintWallet> = director
+  .createWallet()
+  .then((_wallet) => {
+    console.log('Creating wallet...')
+    wallet = _wallet
+    return _wallet
+  })
 
 director.setLogLevel('debug')
 
-export { wallet, director }
+export { wallet, director, walletReady }

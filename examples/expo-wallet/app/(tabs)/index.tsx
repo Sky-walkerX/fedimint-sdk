@@ -28,7 +28,7 @@ const JoinFederation = ({
   checkIsOpen,
 }: {
   open: boolean
-  checkIsOpen: () => void
+  checkIsOpen: () => void | Promise<void>
 }) => {
   const [inviteCode, setInviteCode] = useState(TESTNET_FEDERATION_CODE)
   const [previewData, setPreviewData] = useState<PreviewFederation | null>(null)

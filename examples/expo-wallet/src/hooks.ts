@@ -1,23 +1,27 @@
 import { useCallback, useEffect, useState } from 'react'
-import { wallet } from './wallet'
+import { walletReady } from './wallet'
 
 export const useIsOpen = () => {
   const [open, setIsOpen] = useState(false)
 
-  const checkIsOpen = useCallback(() => {
-    if (wallet && open !== wallet.isOpen()) {
-      setIsOpen(wallet.isOpen())
+  const checkIsOpen = useCallback(async () => {
+    try {
+      const w = await walletReady
+      setIsOpen(w.isOpen())
+    } catch {
+      // wallet not yet ready
     }
-  }, [open])
+  }, [])
 
   useEffect(() => {
     const tryOpen = async () => {
       try {
-        if (wallet && !wallet.isOpen()) {
+        const w = await walletReady
+        if (!w.isOpen()) {
           console.log('Attempting to open wallet on startup...')
-          await wallet.open()
-          checkIsOpen()
+          await w.open()
         }
+        setIsOpen(w.isOpen())
       } catch (e) {
         console.log(
           'Wallet could not be opened on startup (might not be joined): ',
@@ -26,19 +30,21 @@ export const useIsOpen = () => {
       }
     }
     tryOpen()
-    checkIsOpen()
-  }, [checkIsOpen])
+  }, [])
 
   return { open, checkIsOpen }
 }
 
-export const useBalance = (checkIsOpen: () => void) => {
+export const useBalance = (checkIsOpen: () => void | Promise<void>) => {
   const [balance, setBalance] = useState(0)
 
   useEffect(() => {
-    const unsubscribe = wallet?.balance.subscribeBalance((bal) => {
-      checkIsOpen()
-      setBalance(bal)
+    let unsubscribe: (() => void) | undefined
+    walletReady.then((w) => {
+      unsubscribe = w.balance.subscribeBalance((bal: number) => {
+        checkIsOpen()
+        setBalance(bal)
+      })
     })
 
     return () => {
