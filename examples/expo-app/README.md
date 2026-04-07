@@ -26,6 +26,7 @@ Then, ensure all dependencies are installed and the native bindings are built:
 pnpm install
 nix develop .#android -c pnpm ubrn:android
 nix develop .#ios -c pnpm ubrn:ios
+pnpm build:reactnative
 pnpm build
 ```
 
