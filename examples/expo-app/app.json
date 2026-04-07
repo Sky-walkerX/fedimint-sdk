@@ -1,20 +1,20 @@
 {
   "expo": {
-    "name": "Fedimint Expo Wallet",
-    "slug": "expo-wallet-example",
+    "name": "Fedimint Expo App",
+    "slug": "expo-app-example",
     "version": "1.0.0",
-    "scheme": "fedimint-expo-wallet",
+    "scheme": "fedimint-expo-app",
     "platforms": ["ios", "android"],
     "userInterfaceStyle": "dark",
     "splash": {
       "backgroundColor": "#1a1a2e"
     },
     "ios": {
-      "bundleIdentifier": "org.fedimint.expowallet",
+      "bundleIdentifier": "org.fedimint.expoapp",
       "supportsTablet": true
     },
     "android": {
-      "package": "org.fedimint.expowallet",
+      "package": "org.fedimint.expoapp",
       "adaptiveIcon": {
         "backgroundColor": "#1a1a2e"
       }

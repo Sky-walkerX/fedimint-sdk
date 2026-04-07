@@ -1,8 +1,8 @@
 import WalletDirector from '@fedimint/react-native'
 import type { FedimintWallet } from '@fedimint/react-native'
-import RNFS from 'react-native-fs'
+import * as FileSystem from 'expo-file-system'
 
-const dbPath = `${RNFS.DocumentDirectoryPath}/fedimint_db`
+const dbPath = `${FileSystem.documentDirectory}fedimint_db`
 
 const director = new WalletDirector(dbPath)
 let wallet: FedimintWallet | undefined
