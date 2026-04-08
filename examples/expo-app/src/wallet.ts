@@ -1,10 +1,9 @@
 import WalletDirector from '@fedimint/react-native'
 import type { FedimintWallet } from '@fedimint/react-native'
-import * as FileSystem from 'expo-file-system/legacy'
+import { Paths } from 'expo-file-system'
 
-// documentDirectory returns a file:// URI; the Rust FFI layer needs a raw path
-const docDir = (FileSystem.documentDirectory ?? '').replace(/^file:\/\//, '')
-const dbPath = `${docDir}fedimint_db`
+// Paths.document.uri is a file:// URI; the Rust FFI layer needs a raw path
+const dbPath = Paths.document.uri.replace(/^file:\/\//, '') + 'fedimint_db'
 
 const director = new WalletDirector(dbPath)
 let wallet: FedimintWallet | undefined
